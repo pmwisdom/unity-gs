@@ -38,5 +38,7 @@ defmodule UnityGs.Endpoint do
     key: "_unity_gs_key",
     signing_salt: "assvoVT7"
 
+  plug CORSPlug, origin: "*"
+
   plug UnityGs.Router
 end
