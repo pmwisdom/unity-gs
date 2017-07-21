@@ -15,17 +15,19 @@ defmodule UnityGs.GameChannel do
     end
   end
 
-  def leave("game:leave", _payload, socket) do
+  def handle_in("game_leave", _payload, socket) do
     player_id = socket.assigns.user_id
     game_id = socket.assigns.game_id
+
+    IO.puts "Leaving game... #{player_id} #{game_id}"
 
     case Session.leave(game_id, player_id, socket.channel_pid) do
       {:ok, game} ->
         broadcast(socket, "game:player_left", %{player_id: player_id})
 
-        :ok
+        {:reply, {:ok, game}, socket}
       _ ->
-        :ok
+        {:reply, :error, socket}
     end
   end
 

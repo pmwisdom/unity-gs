@@ -34,25 +34,29 @@ defmodule UnityGs.Game.Session do
   def handle_call({:join, player_id, pid}, _from, state) do
     IO.puts "Atttempting to join #{player_id}"
     cond do
-      Map.has_key?(state.players, player_id) -> {:reply, {:error, "You have already joined this game"}, state}
       Enum.count(Map.keys(state.players)) >= state.number_max_players -> {:reply, {:error, "Too many players in game"}, state}
+      Map.has_key?(state.players, player_id) -> {:reply, {:ok, self}, state}
       true ->
         new_state = %{state | players: Map.put_new(state.players, player_id, %Player{id: player_id})}
 
         UnityGs.Game.Event.player_joined
 
-        {:reply, {:ok, self}, new_state}
+        {:reply, {:ok, new_state}, new_state}
     end
   end
 
   def handle_call({:leave, player_id, pid}, _from, state) do
+    IO.puts "Leaving game... #{player_id}"
+    IO.inspect state.players
+    IO.inspect Map.drop(state.players, [player_id])
+
     new_state = %{
-      state | players: Map.pop(state.players, player_id)
+      state | players: Map.drop(state.players, [player_id])
     }
 
     UnityGs.Game.Event.player_left
 
-    {:reply, {:ok, self}, new_state}
+    {:reply, {:ok, new_state}, new_state}
 
   end
 
